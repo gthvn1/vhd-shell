@@ -1,4 +1,4 @@
-use byteorder::{ByteOrder, LittleEndian};
+use byteorder::{BigEndian, ByteOrder};
 use std::fs::File;
 use std::io::{self, Read};
 
@@ -55,18 +55,18 @@ fn parse_vhd_footer(footer_bytes: &[u8]) -> Result<VhdFooter, &'static str> {
     footer.signature.copy_from_slice(&footer_bytes[0..8]);
 
     // Read u32 fields
-    footer.features = LittleEndian::read_u32(&footer_bytes[8..12]);
-    footer.version = LittleEndian::read_u32(&footer_bytes[12..16]);
-    footer.next_offset = LittleEndian::read_u64(&footer_bytes[16..24]);
-    footer.modification_time = LittleEndian::read_u32(&footer_bytes[24..28]);
-    footer.creator_app = LittleEndian::read_u32(&footer_bytes[28..32]);
-    footer.creator_version = LittleEndian::read_u32(&footer_bytes[32..36]);
-    footer.creator_os = LittleEndian::read_u32(&footer_bytes[36..40]);
-    footer.disk_size = LittleEndian::read_u64(&footer_bytes[40..48]);
-    footer.data_size = LittleEndian::read_u64(&footer_bytes[48..56]);
-    footer.disk_geometry = LittleEndian::read_u32(&footer_bytes[56..60]);
-    footer.disk_type = LittleEndian::read_u32(&footer_bytes[60..64]);
-    footer.checksum = LittleEndian::read_u32(&footer_bytes[64..68]);
+    footer.features = BigEndian::read_u32(&footer_bytes[8..12]);
+    footer.version = BigEndian::read_u32(&footer_bytes[12..16]);
+    footer.next_offset = BigEndian::read_u64(&footer_bytes[16..24]);
+    footer.modification_time = BigEndian::read_u32(&footer_bytes[24..28]);
+    footer.creator_app = BigEndian::read_u32(&footer_bytes[28..32]);
+    footer.creator_version = BigEndian::read_u32(&footer_bytes[32..36]);
+    footer.creator_os = BigEndian::read_u32(&footer_bytes[36..40]);
+    footer.disk_size = BigEndian::read_u64(&footer_bytes[40..48]);
+    footer.data_size = BigEndian::read_u64(&footer_bytes[48..56]);
+    footer.disk_geometry = BigEndian::read_u32(&footer_bytes[56..60]);
+    footer.disk_type = BigEndian::read_u32(&footer_bytes[60..64]);
+    footer.checksum = BigEndian::read_u32(&footer_bytes[64..68]);
     footer.identifier.copy_from_slice(&footer_bytes[68..84]);
     footer.saved_state = footer_bytes[84];
 
@@ -92,6 +92,7 @@ fn main() -> io::Result<()> {
             "Confirmed that sig is {:?}",
             String::from_utf8_lossy(&vhd_footer.signature)
         );
+        println!("next offset: {}", vhd_footer.next_offset);
     } else {
         println!("Found {:?} instead of conectix", &footer[0..8]);
     }

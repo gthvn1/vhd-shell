@@ -76,6 +76,65 @@ fn parse_vhd_footer(footer_bytes: &[u8]) -> Result<VhdFooter, &'static str> {
     Ok(footer)
 }
 
+#[derive(Debug)]
+struct DynamicDiskHeader {
+    signature: [u8; 8],                    // "cxsparse"
+    next_offset: u64,                      // Next offset (8 bytes)
+    block_table_offset: u64,               // Block table offset (8 bytes)
+    format_version: u32,                   // Format version (4 bytes)
+    max_block_entries: u32,                // Number of blocks (4 bytes)
+    block_size: u32,                       // Block size (4 bytes)
+    checksum: u32,                         // Checksum (4 bytes)
+    parent_id: [u8; 16],                   // Parent identifier (16 bytes, GUID)
+    parent_modification_time: u32,         // Parent modification time (4 bytes)
+    reserved: u32,                         // Reserved (4 bytes)
+    parent_name: [u8; 512],                // Parent name (UTF-16, 512 bytes)
+    parent_locator_entries: [[u8; 8]; 24], // Array of parent locator entries (8 bytes x 24 entries)
+    reserved_2: [u8; 256],                 // Reserved (256 bytes)
+}
+
+fn parse_dynamic_disk_header(header_bytes: &[u8]) -> Result<DynamicDiskHeader, &'static str> {
+    if header_bytes.len() < 1024 {
+        return Err("Not enough bytes to read dynamic disk header");
+    }
+
+    let mut header = DynamicDiskHeader {
+        signature: [0; 8],
+        next_offset: 0,
+        block_table_offset: 0,
+        format_version: 0,
+        max_block_entries: 0,
+        block_size: 0,
+        checksum: 0,
+        parent_id: [0; 16],
+        parent_modification_time: 0,
+        reserved: 0,
+        parent_name: [0; 512],
+        parent_locator_entries: [[0; 8]; 24],
+        reserved_2: [0; 256],
+    };
+
+    header.signature.copy_from_slice(&header_bytes[0..8]);
+    header.next_offset = BigEndian::read_u64(&header_bytes[8..16]);
+    header.block_table_offset = BigEndian::read_u64(&header_bytes[16..24]);
+    header.format_version = BigEndian::read_u32(&header_bytes[24..28]);
+    header.max_block_entries = BigEndian::read_u32(&header_bytes[28..32]);
+    header.block_size = BigEndian::read_u32(&header_bytes[32..36]);
+    header.checksum = BigEndian::read_u32(&header_bytes[36..40]);
+    header.parent_id.copy_from_slice(&header_bytes[40..56]);
+    header.parent_modification_time = BigEndian::read_u32(&header_bytes[56..60]);
+    header.reserved = BigEndian::read_u32(&header_bytes[60..64]);
+    header.parent_name.copy_from_slice(&header_bytes[64..576]);
+
+    for i in 0..24 {
+        header.parent_locator_entries[i].copy_from_slice(&header_bytes[576 + i * 8..584 + i * 8]);
+    }
+
+    header.reserved_2.copy_from_slice(&header_bytes[768..1024]);
+
+    Ok(header)
+}
+
 fn main() -> io::Result<()> {
     // Open a VHD file in binary mode
     let mut file = File::open("test.vhd")?;
@@ -101,13 +160,21 @@ fn main() -> io::Result<()> {
     }
 
     // Read the dynamic disk header
+    let mut dyn_disk_header = [0u8; 1024];
     file.seek(SeekFrom::Start(512))?;
-    let mut dyn_disk_header = Vec::new();
-    file.take(1024).read_to_end(&mut dyn_disk_header)?;
-    println!(
-        "Signature of dynamic disk header os {:?}",
-        String::from_utf8_lossy(&dyn_disk_header[0..8])
-    );
+    file.read_exact(&mut dyn_disk_header)?;
+
+    // Before parsing the dynamic disk header ensure that signature is correct.
+    if &dyn_disk_header[0..8] == "cxsparse".as_bytes() {
+        let vhd_dyn_disk_header = parse_dynamic_disk_header(&dyn_disk_header).unwrap();
+        println!(
+            "Confirmed that sig is {:?}",
+            String::from_utf8_lossy(&vhd_dyn_disk_header.signature)
+        );
+    } else {
+        println!("Found {:?} instead of cxsparse", &dyn_disk_header[0..8]);
+        return Ok(());
+    }
 
     Ok(())
 }

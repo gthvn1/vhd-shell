@@ -57,6 +57,12 @@ Block size        : 2097152
     - So the first 512 bytes (4096 bits) are used a sector bitmap
     - It remains 2_096_640 bytes for data
 
+- A block allocation table is only needed for dynamic and differential disk images
+- A block allocation table consists of 32-bit entries
+    - 0xFFFFFFFF => block is sparse or stored in parent
+    - Otherwise  => it is the sector number where the data block starts
+                    file offset = (entry * 512) + sector bitmap size
+
 ## Links
 
 - [VHD Specifications](https://github.com/libyal/libvhdi/blob/main/documentation/Virtual%20Hard%20Disk%20(VHD)%20image%20format.asciidoc)

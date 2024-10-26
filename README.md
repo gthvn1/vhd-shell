@@ -25,8 +25,8 @@ on it. It's all we need to play with VHD and understand it.
 ## Current work
 
 - [x] We can read the footer and the dynamic disk header
-- [] read the *test1.txt* in the RAW VHD file
-- [] create a shell like to be able to get information from VHD file
+- [ ] read the *test1.txt* in the RAW VHD file
+- [ ] create a shell like to be able to get information from VHD file
 
 ```
 ❯ cargo run

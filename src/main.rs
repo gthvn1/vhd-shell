@@ -148,11 +148,20 @@ fn main() -> io::Result<()> {
     // Before parsing the footer ensure that at least signature is correct.
     if &footer[0..8] == "conectix".as_bytes() {
         let vhd_footer = parse_vhd_footer(&footer).unwrap();
+        println!("== VHD FOOTER ==");
         println!(
             "Confirmed that sig is {:?}",
             String::from_utf8_lossy(&vhd_footer.signature)
         );
         println!("next offset: {}", vhd_footer.next_offset);
+        println!("Disk size  : {}", vhd_footer.disk_size);
+        println!("Data size  : {}", vhd_footer.data_size);
+        println!(
+            "Disk geometry: Cylinders {}/ Heads {}/ Sectors {}",
+            (vhd_footer.disk_geometry & 0xFFFF_0000) >> 16,
+            (vhd_footer.disk_geometry & 0x0000_FF00) >> 8,
+            vhd_footer.disk_geometry & 0x0000_00FF,
+        )
     } else {
         // If we don't find the signature no need to read the dynamic disk header
         println!("Found {:?} instead of conectix", &footer[0..8]);
@@ -167,11 +176,20 @@ fn main() -> io::Result<()> {
     // Before parsing the dynamic disk header ensure that signature is correct.
     if &dyn_disk_header[0..8] == "cxsparse".as_bytes() {
         let vhd_dyn_disk_header = parse_dynamic_disk_header(&dyn_disk_header).unwrap();
+        println!("\n== Dynamic Disk Header ==");
         println!(
             "Confirmed that sig is {:?}",
             String::from_utf8_lossy(&vhd_dyn_disk_header.signature)
         );
-        println!("Block table offset: {}", vhd_dyn_disk_header.block_table_offset);
+        println!(
+            "Block table offset: {}",
+            vhd_dyn_disk_header.block_table_offset
+        );
+        println!(
+            "Number of blocks  : {}",
+            vhd_dyn_disk_header.max_block_entries
+        );
+        println!("Block size        : {}", vhd_dyn_disk_header.block_size);
     } else {
         println!("Found {:?} instead of cxsparse", &dyn_disk_header[0..8]);
         return Ok(());

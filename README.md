@@ -30,13 +30,32 @@ on it. It's all we need to play with VHD and understand it.
 
 ```
 ❯ cargo run
-    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.03s
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.01s
      Running `target/debug/vhd-shell`
+== VHD FOOTER ==
 Confirmed that sig is "conectix"
 next offset: 512
+Disk size  : 6291456
+Data size  : 6291456
+Disk geometry: Cylinders 180/ Heads 4/ Sectors 17
+
+== Dynamic Disk Header ==
 Confirmed that sig is "cxsparse"
 Block table offset: 2048
+Number of blocks  : 3
+Block size        : 2097152
 ```
+
+## Notes
+
+- Blocks are by default 2M (0x200000)
+- Each block is 4096 Sectors of 512 bytes
+- At the beginning of each block you have a sector bitmap
+    - A sector bitmap needs 4096 bits to track allocation of all sectors
+        - for block that is not 2M: `size of bitmap (in bytes) = block size / ( 512 * 8 )`
+        - sector bitmap is padded to 512 byte sector
+    - So the first 512 bytes (4096 bits) are used a sector bitmap
+    - It remains 2_096_640 bytes for data
 
 ## Links
 

@@ -12,6 +12,7 @@ on it using fdisk:
 sudo modprobe nbd
 sudo qemu-nbd --connect=/dev/nbd0 ./test.vhd
 sudo fdisk /dev/nbd0
+... [ create one primary partition ] 
 ```
 - In order to create a filesystem: `sudo mkfs.ext2 /dev/nbd0p1`
 - So I can mount it: `sudo mount /dev/nbd0p1 /mnt/`

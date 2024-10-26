@@ -1,6 +1,6 @@
 use byteorder::{BigEndian, ByteOrder};
 use std::fs::File;
-use std::io::{self, Read};
+use std::io::{self, Read, Seek, SeekFrom};
 
 // VHD Specifications:
 // https://github.com/libyal/libvhdi/blob/main/documentation/Virtual%20Hard%20Disk%20(VHD)%20image%20format.asciidoc
@@ -78,12 +78,13 @@ fn parse_vhd_footer(footer_bytes: &[u8]) -> Result<VhdFooter, &'static str> {
 
 fn main() -> io::Result<()> {
     // Open a VHD file in binary mode
-    let file = File::open("test.vhd")?;
+    let mut file = File::open("test.vhd")?;
 
     // Read the VHD Footer into a buffer
     // There is a copy at the beginning of the file and the FOOTER is 512 bytes
-    let mut footer = Vec::new();
-    file.take(512).read_to_end(&mut footer)?;
+    let mut footer = [0u8; 512];
+    file.seek(SeekFrom::Start(0))?;
+    file.read_exact(&mut footer)?;
 
     // Before parsing the footer ensure that at least signature is correct.
     if &footer[0..8] == "conectix".as_bytes() {
@@ -94,8 +95,19 @@ fn main() -> io::Result<()> {
         );
         println!("next offset: {}", vhd_footer.next_offset);
     } else {
+        // If we don't find the signature no need to read the dynamic disk header
         println!("Found {:?} instead of conectix", &footer[0..8]);
+        return Ok(());
     }
+
+    // Read the dynamic disk header
+    file.seek(SeekFrom::Start(512))?;
+    let mut dyn_disk_header = Vec::new();
+    file.take(1024).read_to_end(&mut dyn_disk_header)?;
+    println!(
+        "Signature of dynamic disk header os {:?}",
+        String::from_utf8_lossy(&dyn_disk_header[0..8])
+    );
 
     Ok(())
 }

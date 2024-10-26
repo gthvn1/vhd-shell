@@ -171,6 +171,7 @@ fn main() -> io::Result<()> {
             "Confirmed that sig is {:?}",
             String::from_utf8_lossy(&vhd_dyn_disk_header.signature)
         );
+        println!("Block table offset: {}", vhd_dyn_disk_header.block_table_offset);
     } else {
         println!("Found {:?} instead of cxsparse", &dyn_disk_header[0..8]);
         return Ok(());

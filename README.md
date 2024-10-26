@@ -21,6 +21,22 @@ sudo fdisk /dev/nbd0
 - Now I have a quiet small *test.vhd* file that has a partition, a file system and a file
 on it. It's all we need to play with VHD and understand it.
 
+## Current work
+
+- [x] We can read the footer and the dynamic disk header
+- [] read the *test1.txt* in the RAW VHD file
+- [] create a shell like to be able to get information from VHD file
+
+```
+❯ cargo run
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.03s
+     Running `target/debug/vhd-shell`
+Confirmed that sig is "conectix"
+next offset: 512
+Confirmed that sig is "cxsparse"
+Block table offset: 2048
+```
+
 ## Links
 
 - [VHD Specifications](https://github.com/libyal/libvhdi/blob/main/documentation/Virtual%20Hard%20Disk%20(VHD)%20image%20format.asciidoc)

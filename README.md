@@ -77,3 +77,14 @@ Block size        : 2097152
 ## Links
 
 - [VHD Specifications](https://github.com/libyal/libvhdi/blob/main/documentation/Virtual%20Hard%20Disk%20(VHD)%20image%20format.asciidoc)
+
+# vhd nbdkit plugin
+
+- Currently it is not using VHD lib.
+- To build it: `cargo build -p vhd-nbdkit`
+- Start the server: `nbdkit ./target/debug/libvhd_nbdkit.so -f -v`
+- Now we can use a client:
+    - `sudo qemu-nbd --connect=/dev/nbd0 nbd://127.0.0.1:10809`
+    - `sudo qemu-nbd --disconnect /dev/nbd0`
+- Next steps are to read/write into a VHD file
+

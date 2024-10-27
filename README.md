@@ -57,11 +57,22 @@ Block size        : 2097152
     - So the first 512 bytes (4096 bits) are used a sector bitmap
     - It remains 2_096_640 bytes for data
 
+### **BAT**: Block Allocation Table
+
 - A block allocation table is only needed for dynamic and differential disk images
 - A block allocation table consists of 32-bit entries
     - 0xFFFFFFFF => block is sparse or stored in parent
     - Otherwise  => it is the sector number where the data block starts
                     file offset = (entry * 512) + sector bitmap size
+- *blockNumber* is used as index in BAT
+- *Actual sector location* == BAT[BlockNumber] + BlockBitmapSectorCount + SectorInBlock
+- Examples: I created a disk of 5M, so we need 3 blocks (10200 sectors)
+    - If I write sector 1000
+        - *blockNumber* = 1000/4096 = 0
+        - *sectorInBlock* = 1000
+    - If I write sector 5000
+        - blockNumber = 5000/4096 = 1
+        - sectorInBlock = 1096
 
 ## Links
 

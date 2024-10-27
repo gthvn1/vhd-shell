@@ -53,6 +53,13 @@ Block#0002 -> 0x00001006 : bitmap [0x00200c00-0x00200dff], data [0x00200e00-0x00
 
 - You can use `hexdump` to view contents of the disk.
     - `hexdump -s 0xa00 -n 0x200 test.vhd`
+- As we used *ext2* you can also inspect the data using `dumpe2fs`
+```sh
+sudo modprobe nbd
+sudo qemu-nbd --connect=/dev/nbd0 ./test.vhd
+sudo dumpe2fs /dev/nbd0p1
+sudo qemu-nbd --disconnect /dev/nbd0
+```
 
 ## Notes
 

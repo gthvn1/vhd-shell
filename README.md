@@ -33,18 +33,26 @@ on it. It's all we need to play with VHD and understand it.
     Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.01s
      Running `target/debug/vhd-shell`
 == VHD FOOTER ==
-Confirmed that sig is "conectix"
 next offset: 512
 Disk size  : 6291456
 Data size  : 6291456
 Disk geometry: Cylinders 180/ Heads 4/ Sectors 17
 
 == Dynamic Disk Header ==
-Confirmed that sig is "cxsparse"
 Block table offset: 2048
 Number of blocks  : 3
 Block size        : 2097152
+
+== BAT info ==
+Block#0000 -> 0x00000005 : bitmap [0x00000a00-0x00000bff], data [0x00000c00-0x002009ff]
+Block#0001 -> 0xffffffff : block is not allocated
+Block#0002 -> 0x00001006 : bitmap [0x00200c00-0x00200dff], data [0x00200e00-0x00400bff]
 ```
+
+## Debug
+
+- You can use `hexdump` to view contents of the disk.
+    - `hexdump -s 0xa00 -n 0x200 test.vhd`
 
 ## Notes
 

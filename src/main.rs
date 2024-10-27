@@ -1,7 +1,7 @@
 use std::fs::File;
 use std::io::{self, Read, Seek, SeekFrom};
 
-use vhd_shell::vhd::{DynamicDiskHeader, VhdFooter};
+use vhd_lib::vhd::{self, DynamicDiskHeader, VhdFooter};
 
 fn main() -> io::Result<()> {
     // Open a VHD file in binary mode
@@ -43,16 +43,32 @@ fn main() -> io::Result<()> {
         return Ok(());
     }
 
+    let bat_offset = vhd_dyn_disk_header.block_table_offset();
+    let num_of_block = vhd_dyn_disk_header.max_block_entries() as usize;
+    let block_size = vhd_dyn_disk_header.block_size();
+
     println!("\n== Dynamic Disk Header ==");
-    println!(
-        "Block table offset: {}",
-        vhd_dyn_disk_header.block_table_offset()
-    );
-    println!(
-        "Number of blocks  : {}",
-        vhd_dyn_disk_header.max_block_entries()
-    );
-    println!("Block size        : {}", vhd_dyn_disk_header.block_size());
+    println!("Block table offset: {}", bat_offset);
+    println!("Number of blocks  : {}", num_of_block);
+    println!("Block size        : {}", block_size);
+
+    // Get the block entries
+    println!("\n== BAT info ==");
+    let bat_entries = vhd::read_bat_entries(&mut file, bat_offset, num_of_block)?;
+    for (idx, entry) in bat_entries.iter().enumerate() {
+        print!("Block#{:04} -> 0x{:08x} : ", idx, entry,);
+        if *entry == 0xFFFF_FFFF {
+            println!("block is not allocated")
+        } else {
+            println!(
+                "bitmap [0x{:08x}-0x{:08x}], data [0x{:08x}-0x{:08x}]",
+                entry * 512,
+                (entry * 512 + 512) - 1,
+                entry * 512 + 512,
+                entry * 512 + block_size - 1,
+            );
+        }
+    }
 
     Ok(())
 }

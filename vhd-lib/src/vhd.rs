@@ -1,4 +1,6 @@
 use byteorder::{BigEndian, ByteOrder};
+use std::fs::File;
+use std::io::{self, Read, Seek, SeekFrom};
 
 // VHD Specifications:
 // https://github.com/libyal/libvhdi/blob/main/documentation/Virtual%20Hard%20Disk%20(VHD)%20image%20format.asciidoc
@@ -180,4 +182,19 @@ impl DynamicDiskHeader {
     pub fn block_size(&self) -> u32 {
         self.block_size
     }
+}
+
+pub fn read_bat_entries(f: &mut File, bat_offset: u64, num_entries: usize) -> io::Result<Vec<u32>> {
+    f.seek(SeekFrom::Start(bat_offset))?;
+    let mut bat_entries = Vec::with_capacity(num_entries);
+    // Entry is 4 bytes, so read 4 bytes at a time
+    let mut buffer = [0u8; 4];
+
+    for _ in 0..num_entries {
+        f.read_exact(&mut buffer)?;
+        let entry = u32::from_be_bytes(buffer);
+        bat_entries.push(entry);
+    }
+
+    Ok(bat_entries)
 }

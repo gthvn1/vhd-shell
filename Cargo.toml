@@ -3,5 +3,11 @@ name = "vhd-shell"
 version = "0.1.0"
 edition = "2021"
 
+[workspace]
+members = [
+  "vhd-lib",
+  ".",
+]
+
 [dependencies]
-byteorder = "1.5.0"
+vhd-lib = { path = "vhd-lib" }

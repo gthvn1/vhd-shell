@@ -189,3 +189,7 @@ QcowHeader {
     - Bit 56-62: Reserved (set to 0)
     - Bit 63: 0 for an L2 table that is unused or requires COW, 1 if its refcount is exactly one.
 - So in our case we have an L2 at `0x4_0000` and at `0x27_0000`
+- A L2 table contains 512 entries
+    - Each entry of 64bits points to one cluster
+        - A cluster is 64Kb (`0x10000` bytes)
+    - So a L2 table (with default cluster size) can address 32Mo

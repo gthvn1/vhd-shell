@@ -1,3 +1,15 @@
+# Table of contents
+- [VHD shell](#vhd-shell)
+    - [Setup the vhd file for testing](#setup-the-vhd-file-for-testing)
+    - [Current work](#current-work)
+    - [Debug](#debug)
+    - [Notes](#notes)
+    - [Block Allocation Table](#bat-block-allocation-table)
+    - [Links](#links)
+- [VHD NBD toolkit](#vhd-nbdkit-plugin)
+- [QCow lib](#qcow-lib)
+---
+
 # vhd-shell
 
 **Goal**: A shell-like to explore VHD file
@@ -103,3 +115,6 @@ sudo qemu-nbd --disconnect /dev/nbd0
     - `sudo qemu-nbd --disconnect /dev/nbd0`
 - Next steps are to read/write into a VHD file
 
+# Qcow Lib
+
+- Let's do the same for Qcow. We will need to rename the project...

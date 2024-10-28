@@ -1,14 +1,24 @@
 # Table of contents
+- [Links](#links)
 - [VHD shell](#vhd-shell)
     - [Setup the vhd file for testing](#setup-the-vhd-file-for-testing)
     - [Current work](#current-work)
     - [Debug](#debug)
     - [Notes](#notes)
     - [Block Allocation Table](#bat-block-allocation-table)
-    - [Links](#links)
 - [VHD NBD toolkit](#vhd-nbdkit-plugin)
 - [QCow lib](#qcow-lib)
 ---
+
+# Links
+
+## VHD
+- [VHD Specifications](https://github.com/libyal/libvhdi/blob/main/documentation/Virtual%20Hard%20Disk%20(VHD)%20image%20format.asciidoc)
+- [Blktap vhd lib](https://github.com/xapi-project/blktap/tree/master/vhd/lib)
+
+## Qcow
+- [The Qcow2 Image format](https://www.talisman.org/~erlkonig/misc/qcow-image-format.html)
+- [Dirty Bitmaps & Incremental Backup](https://www.qemu.org/docs/master/interop/bitmaps.html)
 
 # vhd-shell
 
@@ -100,10 +110,6 @@ sudo qemu-nbd --disconnect /dev/nbd0
     - If I write sector 5000
         - blockNumber = 5000/4096 = 1
         - sectorInBlock = 1096
-
-## Links
-
-- [VHD Specifications](https://github.com/libyal/libvhdi/blob/main/documentation/Virtual%20Hard%20Disk%20(VHD)%20image%20format.asciidoc)
 
 # vhd nbdkit plugin
 

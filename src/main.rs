@@ -1,11 +1,12 @@
 use std::fs::File;
-use std::io::{self, Read, Seek, SeekFrom};
+use std::io::{self, BufReader, Read, Seek, SeekFrom};
 
+use qcow_lib::qcow::QcowHeader;
 use vhd_lib::vhd::{self, DynamicDiskHeader, VhdFooter};
 
-fn main() -> io::Result<()> {
+fn reading_vhd_file(filename: &str) -> io::Result<()> {
     // Open a VHD file in binary mode
-    let mut file = File::open("test.vhd")?;
+    let mut file = File::open(filename)?;
 
     // Read the VHD Footer into a buffer
     // There is a copy at the beginning of the file and the FOOTER is 512 bytes
@@ -19,7 +20,7 @@ fn main() -> io::Result<()> {
         println!("Found {:?} instead of conectix", &footer[0..8]);
         return Ok(());
     }
-    println!("== VHD FOOTER ==");
+    println!("## VHD FOOTER");
     println!("next offset: {}", vhd_footer.next_offset());
     println!("Disk size  : {}", vhd_footer.disk_size());
     println!("Data size  : {}", vhd_footer.data_size());
@@ -47,13 +48,13 @@ fn main() -> io::Result<()> {
     let num_of_block = vhd_dyn_disk_header.max_block_entries() as usize;
     let block_size = vhd_dyn_disk_header.block_size();
 
-    println!("\n== Dynamic Disk Header ==");
+    println!("\n## Dynamic Disk Header");
     println!("Block table offset: {}", bat_offset);
     println!("Number of blocks  : {}", num_of_block);
     println!("Block size        : {}", block_size);
 
     // Get the block entries
-    println!("\n== BAT info ==");
+    println!("\n## BAT info");
     let bat_entries = vhd::read_bat_entries(&mut file, bat_offset, num_of_block)?;
     for (idx, entry) in bat_entries.iter().enumerate() {
         print!("Block#{:04} -> 0x{:08x} : ", idx, entry,);
@@ -69,6 +70,25 @@ fn main() -> io::Result<()> {
             );
         }
     }
+
+    Ok(())
+}
+
+fn reading_qcow_file(filename: &str) -> io::Result<()> {
+    let file = File::open(filename)?;
+    let mut reader = BufReader::new(file);
+    let header = QcowHeader::from_reader(&mut reader)?;
+
+    println!("{:#?}", header);
+    Ok(())
+}
+
+fn main() -> io::Result<()> {
+    println!("# Reading info from test.vhd file");
+    reading_vhd_file("test.vhd")?;
+
+    println!("\n# Reading info from test.qcow2 file");
+    reading_qcow_file("test.qcow2")?;
 
     Ok(())
 }

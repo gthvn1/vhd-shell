@@ -5,6 +5,7 @@ edition = "2021"
 
 [workspace]
 members = [
+  "qcow-lib",
   "vhd-lib",
   "vhd-nbdkit",
   ".",
@@ -12,3 +13,4 @@ members = [
 
 [dependencies]
 vhd-lib = { path = "vhd-lib" }
+qcow-lib = { path = "qcow-lib" }

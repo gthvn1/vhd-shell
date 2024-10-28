@@ -124,4 +124,34 @@ sudo qemu-nbd --disconnect /dev/nbd0
 
 # Qcow Lib
 
-- Let's do the same for Qcow. We will need to rename the project...
+- Let's do the same for Qcow. We will need to rename the project at some point :)
+- We can create an image using: `qemu-img create -f qcow2 test.qcow2 1G`
+- We can expose it through nbd, create a partition table and a btrfs file system:
+    - `qemu-nbd --connect=/dev/nbd0 ./test.qcow2`
+    - `fdisk /dev/nbd0`
+    - `mkfs.btrfs /dev/nbd0p1`
+    - and now we can mount it and write some stuff in it
+- Qcow is not using **BAT** but L1/L2 table
+- There is a command `qemu-img map ./test.qcow2` that gives you allocated block:
+```
+❯ qemu-img map ./test.qcow2
+Offset          Length          Mapped to       File
+0               0x10000         0x50000         ./test.qcow2
+0x100000        0x200000        0x60000         ./test.qcow2
+0x600000        0x20000         0x480000        ./test.qcow2
+0x1600000       0x10000         0x4c0000        ./test.qcow2
+0x1e00000       0x10000         0x4d0000        ./test.qcow2
+0x2600000       0x10000         0x4a0000        ./test.qcow2
+0x2610000       0x20000         0x4e0000        ./test.qcow2
+0x2630000       0x10000         0x520000        ./test.qcow2
+0x2640000       0x10000         0x540000        ./test.qcow2
+0x4100000       0x10000         0x260000        ./test.qcow2
+0x5920000       0x10000         0x4b0000        ./test.qcow2
+0x5930000       0x20000         0x500000        ./test.qcow2
+0x5950000       0x10000         0x530000        ./test.qcow2
+0x5960000       0x10000         0x550000        ./test.qcow2
+0x3fe00000      0x200000        0x280000        ./test.qcow2
+```
+- It shows that if you try to read at 0x100000 you will in fact read at 0x60000 in the qcow file.
+- The address of L1 is known in the header
+- An L1 entry is a range of virtual space.

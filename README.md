@@ -18,6 +18,7 @@
 
 ## Qcow
 - [The Qcow2 Image format](https://www.talisman.org/~erlkonig/misc/qcow-image-format.html)
+- [Qcow2 Specs](https://github.com/zchee/go-qcow2/blob/master/docs/specification.md)
 - [Dirty Bitmaps & Incremental Backup](https://www.qemu.org/docs/master/interop/bitmaps.html)
 
 # vhd-shell

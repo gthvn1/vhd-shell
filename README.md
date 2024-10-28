@@ -154,4 +154,38 @@ Offset          Length          Mapped to       File
 ```
 - It shows that if you try to read at 0x100000 you will in fact read at 0x60000 in the qcow file.
 - The address of L1 is known in the header
-- An L1 entry is a range of virtual space.
+- An L1 entry is a range of virtual space (The max L1 table size is 32Mb).
+- L2 is one cluster in size
+
+- Running our code returns:
+```
+# Reading info from test.qcow2 file
+QcowHeader {
+    magic: 1363560955,
+    version: 3,
+    backing_file_offset: 0,
+    backing_file_size: 0,
+    cluster_bits: 16,
+    size: 1073741824,
+    crypt_method: 0,
+    l1_size: 2,
+    l1_table_offset: 196608,
+    refcount_table_offset: 65536,
+    refcount_table_clusters: 1,
+    nb_snapshots: 0,
+    snapshots_offset: 0,
+}
+```
+- From the header we know that cluster size is 64K *(Note: using cluster_bits: 1<<16)*
+- l1_table_offset = `0x30000` (196608)
+- There are two entries
+```
+❯ hexdump -C -s 0x30000 -n 0x10 test.qcow2
+00030000  80 00 00 00 00 04 00 00  80 00 00 00 00 27 00 00  |.............'..|
+```
+- A L1 entry:
+    - Bit 00-08: Reserved (set to 0)
+    - Bit 09-55: offset into the image file at which the L2
+    - Bit 56-62: Reserved (set to 0)
+    - Bit 63: 0 for an L2 table that is unused or requires COW, 1 if its refcount is exactly one.
+- So in our case we have an L2 at `0x4_0000` and at `0x27_0000`

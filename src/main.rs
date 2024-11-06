@@ -1,5 +1,6 @@
 use std::fs::File;
 use std::io::{self, BufReader, Read, Seek, SeekFrom};
+use std::path::Path;
 
 use qcow_lib::qcow::QcowHeader;
 use vhd_lib::vhd::{self, DynamicDiskHeader, VhdFooter};
@@ -83,12 +84,83 @@ fn reading_qcow_file(filename: &str) -> io::Result<()> {
     Ok(())
 }
 
-fn main() -> io::Result<()> {
-    println!("# Reading info from test.vhd file");
-    reading_vhd_file("test.vhd")?;
+#[derive(Debug)]
+struct Arguments {
+    vhd_file: Option<String>,
+    qcow_file: Option<String>,
+}
 
-    println!("\n# Reading info from test.qcow2 file");
-    reading_qcow_file("test.qcow2")?;
+impl Arguments {
+    fn usage(name: &str) {
+        println!(
+            "USAGE: {} --vhd <vhd filename> --qcow <qcow filename>",
+            name
+        );
+        println!(
+            "Both options are optinal. Of course if you don't pass any options it is useless."
+        );
+        std::process::exit(1);
+    }
+
+    fn new(args: Vec<String>) -> Arguments {
+        let mut it = args[1..].iter();
+        let mut vhd_file = None;
+        let mut qcow_file = None;
+
+        while let Some(arg) = it.next() {
+            match arg.as_str() {
+                "--vhd" => match it.next() {
+                    Some(fname) => {
+                        let path = Path::new(fname);
+                        if path.exists() && path.is_file() {
+                            vhd_file = Some(fname.to_owned());
+                        } else {
+                            println!("{} doesn't exist or is not a file", fname);
+                            std::process::exit(1);
+                        }
+                    }
+                    None => Arguments::usage(&args[0]),
+                },
+                "--qcow" => match it.next() {
+                    Some(fname) => {
+                        let path = Path::new(fname);
+                        if path.exists() && path.is_file() {
+                            qcow_file = Some(fname.to_owned());
+                        } else {
+                            println!("{} doesn't exist or is not a file", fname);
+                            std::process::exit(1);
+                        }
+                    }
+                    None => Arguments::usage(&args[0]),
+                },
+                "--help" => Arguments::usage(&args[0]),
+                _ => {
+                    println!("Unkown args: {}", arg);
+                    Arguments::usage(&args[0]);
+                }
+            }
+        }
+
+        Arguments {
+            vhd_file,
+            qcow_file,
+        }
+    }
+}
+
+fn main() -> io::Result<()> {
+    let args: Vec<String> = std::env::args().collect();
+    let args = Arguments::new(args);
+
+    if let Some(vhd_file) = args.vhd_file {
+        println!("# Reading info from {} file", vhd_file);
+        reading_vhd_file(&vhd_file)?;
+    }
+
+    if let Some(qcow_file) = args.qcow_file {
+        println!("# Reading info from {} file", qcow_file);
+        reading_qcow_file(&qcow_file)?;
+    }
 
     Ok(())
 }

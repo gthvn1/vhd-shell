@@ -1,6 +1,7 @@
 # Table of contents
 - [Links](#links)
 - [VHD shell](#vhd-shell)
+    - [Usage](#usage)
     - [Setup the vhd file for testing](#setup-the-vhd-file-for-testing)
     - [Current work](#current-work)
     - [Debug](#debug)
@@ -25,6 +26,18 @@
 
 **Goal**: A shell-like to explore VHD file
 
+## Usage
+
+```
+❯ cargo run -- --help
+   Compiling vhd-shell v0.1.0 (/home/gthouvenin/devel/rust/vhd-shell)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.13s
+     Running `target/debug/vhd-shell --help`
+USAGE: target/debug/vhd-shell --vhd <vhd filename> --qcow <qcow filename>
+Both options are optinal. Of course if you don't pass any options it is useless.
+❯ cargo run -- --qcow ./test.qcow2
+[...]
+```
 ## Setup the vhd file for testing
 
 - To create the file I used the Ocaml [vhd-tool](https://opam.ocaml.org/packages/vhd-tool/)
